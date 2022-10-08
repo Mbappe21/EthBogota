@@ -19,9 +19,11 @@
   "homepage": "https://github.com/Mbappe21/EthBogota#readme",
   "dependencies": {
     "@account-abstraction/contracts": "^0.2.0",
+    "@openzeppelin/contracts": "^4.7.3",
     "hardhat": "^2.11.2"
   },
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^2.0.0"
+    "@nomicfoundation/hardhat-toolbox": "^2.0.0",
+    "dotenv": "^16.0.3"
   }
 }
