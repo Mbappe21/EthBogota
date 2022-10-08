@@ -48,6 +48,10 @@ contract BasicFuncs{
 
         if(findChallenge[_challengeId].nOfChallengers>2){
             //Update Stream
+
+
+
+            
         }
 
     }
