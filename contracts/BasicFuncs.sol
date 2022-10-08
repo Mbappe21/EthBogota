@@ -3,14 +3,14 @@ pragma solidity ^0.8.12;
 
 contract BasicFuncs{
 
-    address owner;
-    address recipient2;
-    address recipient3;
-    address recipient4;
-    uint256 challengeId;
+    address public owner;
+    address public recipient2;
+    address public recipient3;
+    address public recipient4;
+    uint256 public challengeId;
 
-    mapping(uint=>mapping(address=>bool)) hasChallenged;
-    mapping(uint=>Challenge) findChallenge;
+    mapping(uint=>mapping(address=>bool)) public hasChallenged;
+    mapping(uint=>Challenge) public findChallenge;
 
     event NewChallenge(uint256 challengeId, address recipient);
 
@@ -33,6 +33,7 @@ contract BasicFuncs{
         Challenge memory _challenge;
        _challenge=Challenge(challengeId, recipient, 1, block.timestamp+ 3 /* Equivalent of 3 days*/);
        hasChallenged[challengeId][msg.sender]=true;
+       findChallenge[challengeId]=_challenge;
 
        emit NewChallenge(challengeId, recipient);
     }
