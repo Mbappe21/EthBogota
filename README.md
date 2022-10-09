@@ -1,13 +1,8 @@
-# Sample Hardhat Project
+# Fund Flow Contracts
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+Easily manage open source and DAO contributor wages using social consensus
 
-Try running some of the following tasks:
+[Frontend](https://github.com/JohnGuilding/frontend)
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
-```
+[NFT Contracts](https://github.com/marciob/funds-flow-nft)
+- NFT contract Goerli address: 0x3ABcC6559aa2008CaC3eF2c8fEf1E2b9557BA50f
