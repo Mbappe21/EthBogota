@@ -7,6 +7,9 @@ import {ISuperfluidToken} from "@superfluid-finance/ethereum-contracts/contracts
 import {IConstantFlowAgreementV1} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/IConstantFlowAgreementV1.sol";
 import {CFAv1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/CFAv1Library.sol";
 
+interface IPUSHCommInterface {
+    function sendNotification(address _channel, address _recipient, bytes calldata _identity) external;
+}
 
 contract ContributionPool {
     address public communityNFTContract;
@@ -62,7 +65,7 @@ contract ContributionPool {
     }
 
     function voteForRecipient(address _recipient) external {
-        require( hasVotedForRecipient[msg.sender][_recipient]==false, "You have already voted this Recipient");
+        // require( hasVotedForRecipient[msg.sender][_recipient]==false, "You have already voted this Recipient");
 
         hasVotedForRecipient[msg.sender][_recipient]=true;
 
@@ -71,10 +74,27 @@ contract ContributionPool {
         if(findRecipient[_recipient].votesFor>2){
         }
 
+        IPUSHCommInterface(0x2b9bE9259a4F5Ba6344c1b1c07911539642a2D33).sendNotification(
+            0xd513baa0152D8630e5989eCf4FD411dAC6061B84,
+            _recipient,
+            bytes(
+                string(
+                    abi.encodePacked(
+                        "0", 
+                        "+", 
+                        "3", 
+                        "+", 
+                        "New Vote", 
+                        "+", 
+                        "A community Member voted for you! " 
+                    )
+                )
+            )
+        );
     }
 
     function voteAgainstRecipient(address _recipient) external {
-        require( hasVotedForRecipient[msg.sender][_recipient]==false, "You have already voted this Recipient");
+        // require( hasVotedForRecipient[msg.sender][_recipient]==false, "You have already voted this Recipient");
 
         hasVotedForRecipient[msg.sender][_recipient]=true;
 
@@ -82,6 +102,24 @@ contract ContributionPool {
 
         if(findRecipient[_recipient].votesAgainst>2){
         }
+
+        IPUSHCommInterface(0x2b9bE9259a4F5Ba6344c1b1c07911539642a2D33).sendNotification(
+            0xd513baa0152D8630e5989eCf4FD411dAC6061B84,
+            _recipient,
+            bytes(
+                string(
+                    abi.encodePacked(
+                        "0", 
+                        "+", 
+                        "3", 
+                        "+", 
+                        "New Vote", 
+                        "+", 
+                        "A community Member voted against you :( ! " 
+                    )
+                )
+            )
+        );
     }
 
     function wrap() external {
