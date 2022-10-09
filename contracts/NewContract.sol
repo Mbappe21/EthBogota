@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.12;
 
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {ISuperfluid, ISuperToken, ISuperApp} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import {ISuperfluidToken} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluidToken.sol";
+import {IConstantFlowAgreementV1} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/IConstantFlowAgreementV1.sol";
+import {CFAv1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/CFAv1Library.sol";
+
+
 contract NewContract{
     address public communityNFTContract;
 
@@ -13,7 +20,9 @@ contract NewContract{
         uint votesAgainst;
     }
 
-    constructor(address addr1, address addr2, address addr3, address addr4, address addr5, address _NFT) payable{
+    CFAv1Library.InitData public cfaV1;
+
+    constructor(address addr1, address addr2, address addr3, address addr4, address addr5, address _NFT, ISuperfluid host) payable{
         Recipient memory _recipient;
 
         _recipient=Recipient(addr1, 0, 0);
@@ -30,6 +39,24 @@ contract NewContract{
 
         communityNFTContract=_NFT;
 
+        cfaV1 = CFAv1Library.InitData(
+            host,
+            IConstantFlowAgreementV1(
+                address(
+                    host.getAgreementClass(
+                        keccak256("org.superfluid-finance.agreements.ConstantFlowAgreement.v1")
+                    )
+                )
+            )
+        );
+    }
+
+        /// @notice Update an existing stream being sent into the contract by msg sender.
+    /// @dev This requires the contract to be a flowOperator for the msg sender.
+    /// @param token Token to stream.
+    /// @param flowRate Flow rate per second to stream.
+    function updateFlowIntoContract(ISuperfluidToken token, int96 flowRate) external {
+        cfaV1.updateFlowByOperator(msg.sender, address(this), token, flowRate);
     }
 
     function voteForRecipient(address _recipient) external onlyCommunityMember{
@@ -40,7 +67,7 @@ contract NewContract{
         findRecipient[_recipient].votesFor++;
 
         if(findRecipient[_recipient].votesFor>2){
-            //Update Stream
+            updateFlowIntoContract();
         }
 
     }
@@ -53,10 +80,34 @@ contract NewContract{
         findRecipient[_recipient].votesAgainst++;
 
         if(findRecipient[_recipient].votesAgainst>2){
-            //Update Stream
+            // define fl
+            updateFlowIntoContract();
+            updateFlowIntoContract();
+            updateFlowIntoContract();
+            updateFlowIntoContract();
+            updateFlowIntoContract();
         }
-
     }
+
+    function wrap() external {
+        // approving
+        IERC20(underlyingTokenAddress).approve(superTokenAddress, amountToWrap);
+
+        // wrapping
+        ISuperToken(superTokenAddress).upgrade(amountToWrap);
+    }
+
+    /// @notice Create a stream into the contract.
+    /// @dev This requires the contract to be a flowOperator for the msg sender.
+    /// @param token Token to stream.
+    /// @param flowRate Flow rate per second to stream.
+    function createFlowIntoContract(ISuperfluidToken token, int96 flowRate) external {
+        if (!accountList[msg.sender] && msg.sender != owner) revert Unauthorized();
+
+        cfaV1.createFlowByOperator(msg.sender, address(this), token, flowRate);
+    }
+
+
 
     function deposit() public payable{ }
 
