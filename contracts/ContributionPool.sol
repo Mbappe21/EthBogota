@@ -8,7 +8,7 @@ import {IConstantFlowAgreementV1} from "@superfluid-finance/ethereum-contracts/c
 import {CFAv1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/CFAv1Library.sol";
 
 
-contract NewContract{
+contract ContributionPool {
     address public communityNFTContract;
 
     mapping(address=>mapping(address=>bool)) public hasVotedForRecipient;
@@ -49,17 +49,19 @@ contract NewContract{
                 )
             )
         );
+
+        // approving
+        address underlyingTokenAddress = 0x88271d333C72e51516B67f5567c728E702b3eeE8;
+        address superTokenAddress = 0xF2d68898557cCb2Cf4C10c3Ef2B034b2a69DAD00;
+        uint256 amountToWrap = IERC20(underlyingTokenAddress).balanceOf(address(this));
+
+        IERC20(underlyingTokenAddress).approve(superTokenAddress, amountToWrap);
+
+        // wrapping
+        ISuperToken(superTokenAddress).upgrade(amountToWrap);
     }
 
-        /// @notice Update an existing stream being sent into the contract by msg sender.
-    /// @dev This requires the contract to be a flowOperator for the msg sender.
-    /// @param token Token to stream.
-    /// @param flowRate Flow rate per second to stream.
-    function updateFlowIntoContract(ISuperfluidToken token, int96 flowRate) external {
-        cfaV1.updateFlowByOperator(msg.sender, address(this), token, flowRate);
-    }
-
-    function voteForRecipient(address _recipient) external onlyCommunityMember{
+    function voteForRecipient(address _recipient) external {
         require( hasVotedForRecipient[msg.sender][_recipient]==false, "You have already voted this Recipient");
 
         hasVotedForRecipient[msg.sender][_recipient]=true;
@@ -67,12 +69,11 @@ contract NewContract{
         findRecipient[_recipient].votesFor++;
 
         if(findRecipient[_recipient].votesFor>2){
-            updateFlowIntoContract();
         }
 
     }
 
-    function voteAgainstRecipient(address _recipient) external onlyCommunityMember{
+    function voteAgainstRecipient(address _recipient) external {
         require( hasVotedForRecipient[msg.sender][_recipient]==false, "You have already voted this Recipient");
 
         hasVotedForRecipient[msg.sender][_recipient]=true;
@@ -80,59 +81,36 @@ contract NewContract{
         findRecipient[_recipient].votesAgainst++;
 
         if(findRecipient[_recipient].votesAgainst>2){
-            // define fl
-            updateFlowIntoContract();
-            updateFlowIntoContract();
-            updateFlowIntoContract();
-            updateFlowIntoContract();
-            updateFlowIntoContract();
         }
     }
 
     function wrap() external {
         // approving
+        address underlyingTokenAddress = 0x88271d333C72e51516B67f5567c728E702b3eeE8;
+        address superTokenAddress = 0xF2d68898557cCb2Cf4C10c3Ef2B034b2a69DAD00;
+        uint256 amountToWrap = IERC20(underlyingTokenAddress).balanceOf(address(this));
+
         IERC20(underlyingTokenAddress).approve(superTokenAddress, amountToWrap);
 
         // wrapping
         ISuperToken(superTokenAddress).upgrade(amountToWrap);
     }
 
-    /// @notice Create a stream into the contract.
-    /// @dev This requires the contract to be a flowOperator for the msg sender.
-    /// @param token Token to stream.
-    /// @param flowRate Flow rate per second to stream.
-    function createFlowIntoContract(ISuperfluidToken token, int96 flowRate) external {
-        if (!accountList[msg.sender] && msg.sender != owner) revert Unauthorized();
+    // function createFlowIntoContract(ISuperfluidToken token, int96 flowRate) external {
+    //     // if (!accountList[msg.sender] && msg.sender != owner) revert Unauthorized();
+    //     cfaV1.createFlowByOperator(msg.sender, address(this), token, flowRate);
+    // }
 
-        cfaV1.createFlowByOperator(msg.sender, address(this), token, flowRate);
-    }
-
-
+    // function updateFlowIntoContract(ISuperfluidToken token, int96 flowRate) internal {
+    //     cfaV1.updateFlowByOperator(msg.sender, address(this), token, flowRate);
+    // }
 
     function deposit() public payable{ }
 
-    modifier onlyCommunityMember() {
-        (bool success,) =communityNFTContract.call{ gas: 5000}(
-        abi.encodeWithSignature("balanceOf(address)", msg.sender));
-        require(success, "You do not hold the Community NFT");
-        _;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    // modifier onlyCommunityMember() {
+    //     (bool success,) =communityNFTContract.call{ gas: 5000}(
+    //     abi.encodeWithSignature("balanceOf(address)", msg.sender));
+    //     require(success, "You do not hold the Community NFT");
+    //     _;
+    // }
 }

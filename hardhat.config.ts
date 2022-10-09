@@ -6,9 +6,9 @@ dotenv.config();
 const config: HardhatUserConfig = {
     solidity: "0.8.17",
     networks: {
-        arbitrum_goerli: {
-            url: process.env.ARBITRUM_GOERLI_URL,
-            accounts: [process.env.ARBITRUM_GOERLI_PRIVATE_KEY || ""],
+        goerli: {
+            url: process.env.GOERLI_URL,
+            accounts: [process.env.GOERLI_PRIVATE_KEY || ""],
         },
     },
 };
